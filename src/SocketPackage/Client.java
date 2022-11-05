@@ -1,3 +1,5 @@
+package SocketPackage;
+
 import tools.Complaints;
 
 import java.io.*;
@@ -6,7 +8,7 @@ import java.net.Socket;
 
 public class Client {
     public static void main(String[]args) throws IOException, InterruptedException {
-        String userlogin = "Client";
+        String userlogin = "SocketPackage.Client";
         String username = "Johny";
         String password = "Johny123";
 

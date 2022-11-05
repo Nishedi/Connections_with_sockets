@@ -1,12 +1,11 @@
-import tools.FileWriterReader;
+package SocketPackage;
+
 import tools.Menegerofusers;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
 
 
 public class Server {

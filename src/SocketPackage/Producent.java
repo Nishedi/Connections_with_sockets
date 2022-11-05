@@ -1,3 +1,5 @@
+package SocketPackage;
+
 import tools.Complaints;
 
 import java.io.*;
@@ -13,22 +15,6 @@ public class Producent {
         SocketClient producent = new SocketClient(socket);
         producent.listenForMessage();
 
-        /*
-            while(seller.numberofmessages()>0){
-
-                Random rand = new Random();
-                int d = rand.nextInt(0,2);
-                d=0;
-                String strtoloss;
-                if(d==0) strtoloss = "atproducer";
-                else strtoloss = "tocorrect";
-                comp.status=strtoloss;
-                comp.changeHead(userlogin,username,password);
-                seller.sendMessage(comp.toString());*/
-
-
-
-
         while(1==1){
             comp = new Complaints(userlogin,username,password);
             comp.command="getAllProducer";
@@ -41,13 +27,22 @@ public class Producent {
                 System.out.println(comp);
                 Random rand = new Random();
                 int d = rand.nextInt(0,2);
+                int d2 = rand.nextInt(0,14);
                 d=1;
-                String strtoloss;
-                if(d==0) strtoloss = "rejected";
-                else strtoloss = "confirmed";
-                comp.status=strtoloss;
-                comp.changeHead(userlogin,username,password);
-                producent.sendMessage(comp.toString());
+
+                Integer RegistrationDateInt = Integer.valueOf(comp.ForwardDate);
+                Integer CurrentDateInt = Integer.valueOf(comp.CurrentDate);
+                Integer diffrence = CurrentDateInt - RegistrationDateInt;
+                if(diffrence>d2) {
+
+                    String strtoloss;
+                    if(d==0) strtoloss = "rejected";
+                    else strtoloss = "confirmed";
+                    comp.status=strtoloss;
+                    comp.changeHead(userlogin, username, password);
+                    comp.ResponseDate = comp.CurrentDate;
+                    producent.sendMessage(comp.toString());
+                }
             }
         }
     }

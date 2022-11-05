@@ -18,7 +18,7 @@ public class Complaints {
     public String argument="";
     public int parseResults=0;
     public String Company = "";
-    public String CurrentDate = "???";
+    public String CurrentDate = "1";
 
     public Complaints(String str){
         parseFromString(str);

@@ -1,3 +1,5 @@
+package SocketPackage;
+
 import tools.Complaints;
 import tools.Menegerofusers;
 import java.io.*;
@@ -40,8 +42,7 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
-
+       // formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
         String messageFromClient;
         while(socket.isConnected()){
 
@@ -59,10 +60,12 @@ public class ClientHandler implements Runnable {
                 String command = complain.command;
                 long time=System.currentTimeMillis();
                 Long diffrence = (time - starttime)/1000;
+                String curentdate = diffrence.toString();
+                System.out.println(curentdate);
                 if(b==1){
                     Complaints comp = new Complaints("server","","");
                     comp.command="Invalid data format!";
-                    comp.RegistrationDate=diffrence.toString();
+                    comp.RegistrationDate=curentdate;
                     SendMessage(comp.toString());
                     continue;
                 }
@@ -79,7 +82,7 @@ public class ClientHandler implements Runnable {
                     if(authorization==false) {
                         Complaints comp = new Complaints("server","","");
                         comp.command="Wrong authorization!";
-                        comp.CurrentDate=diffrence.toString();
+                        comp.CurrentDate=curentdate;
                         SendMessage(comp.toString());
                         continue;
                     }
@@ -89,29 +92,23 @@ public class ClientHandler implements Runnable {
                         Complaints comp = new Complaints("server","","");
                         comp.command="ComplienceID";
                         comp.argument=numbertosend.toString();
-                        comp.CurrentDate=diffrence.toString();
+                        comp.CurrentDate=curentdate;
                         SendMessage(comp.toString());
                         continue;
                     }
 
                     if(command.compareTo("save")==0){
 
-
-                        //System.out.println("DIF = "+diffrence);
-
-                        //String[] tabdate = formatter.format(date).split(" ");
-                        //System.out.println(tabdate[0]);
-                        if(complain.login.compareTo("Client")==0)
-                        complain.RegistrationDate=diffrence.toString();
-                        System.out.println("compdate+"+complain.RegistrationDate);
+                        //System.out.println("compdate+"+complain.RegistrationDate);
                         String key = complain.idofcomplaint;
                         if(!mapofprovided.containsKey(key)){
-
                             mapofprovided.put(key,complain);
                         }
-
                         if(complain.status.compareTo("tosend")==0) {
                             complain.status = "atseller";
+                            if(complain.login.compareTo("Client")==0)
+                                complain.RegistrationDate= curentdate;
+
                         }
                         mapofprovided.put(key, complain);
                         continue;
@@ -120,9 +117,9 @@ public class ClientHandler implements Runnable {
 
                     if(command.compareTo("getAllSeller")==0){
                         for(String s: mapofprovided.keySet()){
-                            if(mapofprovided.get(s).status.compareTo("atseller")==0) {
+                            if((mapofprovided.get(s).status.compareTo("atseller")==0)||(mapofprovided.get(s).status.compareTo("confirmed")==0)) {
                                 Complaints comp = mapofprovided.get(s);
-                                comp.CurrentDate=diffrence.toString();
+                                comp.CurrentDate=curentdate;
                                 SendMessage(comp.toString());
                             }
                         }
@@ -135,7 +132,7 @@ public class ClientHandler implements Runnable {
 
                             if(mapofprovided.get(s).status.compareTo("atproducer")==0) {
                                 Complaints comp = mapofprovided.get(s);
-                                comp.CurrentDate=diffrence.toString();
+                                comp.CurrentDate=curentdate;
                                 SendMessage(comp.toString());
                             }
                         }
@@ -143,11 +140,11 @@ public class ClientHandler implements Runnable {
                     }
 
                     if(command.compareTo("getAll")==0){
-
+                        System.out.println("current="+curentdate);
                         for(String s: mapofprovided.keySet()){
                             Complaints comptemp = mapofprovided.get(s);
                             comptemp.changeHead("Server","","");
-                            comptemp.CurrentDate=diffrence.toString();
+                            comptemp.CurrentDate=curentdate;
                             SendMessage(comptemp.toString());
                             //mapofprovided.get(s).toString()
                             }

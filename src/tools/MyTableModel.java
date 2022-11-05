@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class MyTableModel extends AbstractTableModel {
     private String[] columnNames = {"ComplianceCode",
-            "Client",
+            "SocketPackage.Client",
             "Product",
             "Company",
             "Status",
