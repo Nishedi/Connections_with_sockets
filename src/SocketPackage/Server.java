@@ -11,16 +11,17 @@ import java.net.URL;
 public class Server {
 
     private ServerSocket serverSocket;
-
     public Server(ServerSocket serverSocket) throws Exception {
         this.serverSocket = serverSocket;
     }
 
-    public void startServer(){
+    public void startServer(Menegerofusers menegerofusers){
+        long starttime=System.currentTimeMillis();
         try{
             while(!serverSocket.isClosed()){
                 Socket socket = serverSocket.accept();
-                ClientHandler clientHandler = new ClientHandler(socket);
+
+                ClientHandler clientHandler = new ClientHandler(socket,starttime, menegerofusers);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
             }
@@ -35,19 +36,15 @@ public class Server {
         }catch (IOException e){
             e.printStackTrace();
         }
-
     }
 
     public static void main(String[] args) throws Exception {
-        String s ="file:/C:/DB/"+"usernames.txt";
-        URL url= new URL(s);
-        Menegerofusers menegerofusers = new Menegerofusers();
+        String ss ="file:/C:/DB/"+"usernames.csv";
+        Menegerofusers meneger = new Menegerofusers();
+        meneger.Load(ss);
 
-        menegerofusers.load_data(url);
         ServerSocket serverSocket = new ServerSocket(1234);
         Server server = new Server(serverSocket);
-        server.startServer();
+        server.startServer(meneger);
     }
-
-
 }

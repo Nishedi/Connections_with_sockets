@@ -2,11 +2,43 @@ package tools;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
 public class FileWriterReader {
-    public ArrayList<String> read(URL url) throws Exception {
+
+    public static ArrayList<String> loadFromCSV(String filename)  {
+        ArrayList<String> stringlist = new ArrayList<>();
+        URL url= null;
+        try {
+            url = new URL(filename);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        FileWriterReader reader = new FileWriterReader();
+        ArrayList<String>lstr=new ArrayList<>();
+        try {
+            lstr=reader.read(url);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        String columnnames[] = lstr.get(0).split(";");
+        lstr.remove(0);
+        for(String str:lstr){
+            String split[] = str.split(";");
+            String string = "";
+            for(int i =0; i<=columnnames.length-1;i++){
+                String value="";
+                if(split.length>i)
+                    value=split[i];
+                string=string + columnnames[i] + ":" + value+";";
+            }
+            stringlist.add(string);
+        }
+        return stringlist;
+    }
+    public ArrayList<String> read(URL url) {
         ArrayList<String> list = new ArrayList<>();
         try {
             BufferedReader ReadF = null;
@@ -27,23 +59,4 @@ public class FileWriterReader {
 
         return list;
     }
-
-    /*public static void savetootherfile(String name, Map<String, Complaints> mapofcomplains) throws IOException {
-        ArrayList<String> list = new ArrayList<>();
-        for(String s: mapofcomplains.keySet()){
-            list.add(mapofcomplains.get(s).toSString());
-        }
-        FileWriter fWriter = null;
-        try {
-            fWriter = new FileWriter(name);//nazwa pliku
-
-            for(String s: list)
-                fWriter.write(s+"\n");
-
-        } finally {
-            if (fWriter != null) {
-                fWriter.close();
-            }
-        }
-    }*/
 }

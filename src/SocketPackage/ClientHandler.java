@@ -5,33 +5,22 @@ import tools.Menegerofusers;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.Period;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class ClientHandler implements Runnable {
     public static Map<String, Complaints> mapofprovided=new HashMap<>();
-    public static Integer numbertosend = 0;
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     public static Menegerofusers menegerofusers;
-    SimpleDateFormat formatter= null;
     long starttime=0;
 
-    public ClientHandler(Socket socket) throws Exception {
+    public ClientHandler(Socket socket, long starttime, Menegerofusers meneger) throws Exception {
         try{
-            starttime = System.currentTimeMillis();
-            String s ="file:/C:/DB/"+"usernames.txt";
-            URL url= new URL(s);
-            this.menegerofusers = new Menegerofusers();
-            menegerofusers.load_data(url);
+            menegerofusers=meneger;
+            this.starttime = starttime;
             this.socket=socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -42,18 +31,12 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-       // formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
         String messageFromClient;
         while(socket.isConnected()){
-
             try{
                 messageFromClient=bufferedReader.readLine();
-                //System.out.println(messageFromClient);
-                Complaints complain = new Complaints(messageFromClient);
-                System.out.println(complain.toString());
-                System.out.println("msg= "+messageFromClient);
-                int b = complain.parseResults;
-                if(b==-1)continue;
+                Complaints complain = new Complaints();
+                complain.updateFromString(messageFromClient);
 
                 String username = complain.username;
                 String password = complain.password;
@@ -61,45 +44,22 @@ public class ClientHandler implements Runnable {
                 long time=System.currentTimeMillis();
                 Long diffrence = (time - starttime)/1000;
                 String curentdate = diffrence.toString();
-                System.out.println(curentdate);
-                if(b==1){
-                    Complaints comp = new Complaints("server","","");
-                    comp.command="Invalid data format!";
-                    comp.RegistrationDate=curentdate;
-                    SendMessage(comp.toString());
-                    continue;
-                }
 
-                if(b!=1){
+                if(1==1){
 
                     //check authorization
-                    boolean authorization = false;
-                    if(menegerofusers.mapofusers.containsKey(username)==true){
-                        if(menegerofusers.mapofusers.get(username).password.compareTo(password)==0){
-                            authorization = true;
-                        }
-                    }
+                    boolean authorization = menegerofusers.checkauthorization(username, password);
+
                     if(authorization==false) {
-                        Complaints comp = new Complaints("server","","");
+                        Complaints comp = new Complaints();
+                        comp.updateFromString("login:server;username:;password:;");
                         comp.command="Wrong authorization!";
                         comp.CurrentDate=curentdate;
                         SendMessage(comp.toString());
                         continue;
                     }
 
-                    if(command.compareTo("askforcomplienceid")==0){
-                        numbertosend++;
-                        Complaints comp = new Complaints("server","","");
-                        comp.command="ComplienceID";
-                        comp.argument=numbertosend.toString();
-                        comp.CurrentDate=curentdate;
-                        SendMessage(comp.toString());
-                        continue;
-                    }
-
                     if(command.compareTo("save")==0){
-
-                        //System.out.println("compdate+"+complain.RegistrationDate);
                         String key = complain.idofcomplaint;
                         if(!mapofprovided.containsKey(key)){
                             mapofprovided.put(key,complain);
@@ -108,12 +68,10 @@ public class ClientHandler implements Runnable {
                             complain.status = "atseller";
                             if(complain.login.compareTo("Client")==0)
                                 complain.RegistrationDate= curentdate;
-
                         }
                         mapofprovided.put(key, complain);
                         continue;
                     }
-
 
                     if(command.compareTo("getAllSeller")==0){
                         for(String s: mapofprovided.keySet()){
@@ -127,35 +85,42 @@ public class ClientHandler implements Runnable {
                     }
 
                     if(command.compareTo("getAllProducer")==0){
-
+                        String producent = complain.username;
+                        //System.out.println("producent "+producent);
                         for(String s: mapofprovided.keySet()){
-
                             if(mapofprovided.get(s).status.compareTo("atproducer")==0) {
                                 Complaints comp = mapofprovided.get(s);
-                                comp.CurrentDate=curentdate;
-                                SendMessage(comp.toString());
+                                //System.out.println("tempproducer "+comp.Company);
+                               if(producent.compareTo(comp.Company)==0) {
+                                    comp.CurrentDate = curentdate;
+                                    SendMessage(comp.toString());
+                                }
                             }
                         }
                         continue;
                     }
 
                     if(command.compareTo("getAll")==0){
-                        System.out.println("current="+curentdate);
-                        for(String s: mapofprovided.keySet()){
+                        String client = complain.Client;
+                        for(String s: mapofprovided.keySet()) {
                             Complaints comptemp = mapofprovided.get(s);
-                            comptemp.changeHead("Server","","");
-                            comptemp.CurrentDate=curentdate;
-                            SendMessage(comptemp.toString());
-                            //mapofprovided.get(s).toString()
+                            if(client.compareTo(comptemp.Client)==0){
+                                String str = "login:Server;username:;password:;" + "CurrentDate:" + curentdate + ";";
+                                comptemp.updateFromString(str);
+                                SendMessage(comptemp.toString());
+                                }
                             }
                         continue;
                     }
-                   // System.out.println(messageFromClient);
                     SendMessage(messageFromClient);
                 }
             }catch (IOException e){
                 closeEverything(socket, bufferedReader, bufferedWriter);
                 break;
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -189,5 +154,4 @@ public class ClientHandler implements Runnable {
             e.printStackTrace();
         }
     }
-
 }

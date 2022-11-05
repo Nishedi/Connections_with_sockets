@@ -1,7 +1,5 @@
 package SocketPackage;
 
-import tools.Complaints;
-
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -12,7 +10,6 @@ public class SocketClient {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String username;
-
     public int numberofmessages(){
         return listofids.size();
     }
@@ -29,8 +26,6 @@ public class SocketClient {
             this.socket=socket;
             this.bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-
         }catch (IOException e){
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
@@ -57,13 +52,15 @@ public class SocketClient {
                     try{
                         msgFromGroupChat=bufferedReader.readLine();
                         listofids.add(msgFromGroupChat);
-                        //System.out.println(msgFromGroupChat);
                     }catch (IOException e){
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }
                 }
             }
         }).start();
+    }
+    public void close(){
+        closeEverything(socket, bufferedReader, bufferedWriter);
     }
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
         try {

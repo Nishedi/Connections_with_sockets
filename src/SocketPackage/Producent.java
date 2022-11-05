@@ -5,41 +5,47 @@ import tools.Complaints;
 import java.io.*;
 import java.net.Socket;
 import java.util.Random;
+import java.util.Scanner;
+
 public class Producent {
-    public static void main(String[]args) throws IOException, InterruptedException {
+    public static void main(String[]args) throws IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String userlogin = "Producer";
-        String username = "Kate";
-        String password = "Kate123";
+        String username = "Samsung";
+        String password = "Samsung123";
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Type Company login: ");
+        username = scan.nextLine();
+        System.out.println("Type Company password: ");
+        password = scan.nextLine();
         Complaints comp = new Complaints();
         Socket socket = new Socket("localhost", 1234);
         SocketClient producent = new SocketClient(socket);
         producent.listenForMessage();
 
         while(1==1){
-            comp = new Complaints(userlogin,username,password);
+            comp.updateFromString("login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";");
             comp.command="getAllProducer";
             producent.sendMessage(comp.toString());
             Thread.sleep(1000);
 
             while(producent.numberofmessages()>0){
                 String str=producent.getAndRemove();
-                comp = new Complaints(str);
-                System.out.println(comp);
+                System.out.println(str);
+                comp = new Complaints();
+                comp.updateFromString(str);
+                if(comp.command.compareTo("Wrong authorization!")==0){
+                    System.out.println("Wrong authorization!");
+                    return;
+                }
                 Random rand = new Random();
-                int d = rand.nextInt(0,2);
-                int d2 = rand.nextInt(0,14);
-                d=1;
-
+                int d = rand.nextInt(0,14);
                 Integer RegistrationDateInt = Integer.valueOf(comp.ForwardDate);
                 Integer CurrentDateInt = Integer.valueOf(comp.CurrentDate);
                 Integer diffrence = CurrentDateInt - RegistrationDateInt;
-                if(diffrence>d2) {
-
-                    String strtoloss;
-                    if(d==0) strtoloss = "rejected";
-                    else strtoloss = "confirmed";
-                    comp.status=strtoloss;
-                    comp.changeHead(userlogin, username, password);
+                if(diffrence>d) {
+                    String string = "login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";";
+                    comp.updateFromString(string);
+                    comp.status="confirmed";
                     comp.ResponseDate = comp.CurrentDate;
                     producent.sendMessage(comp.toString());
                 }

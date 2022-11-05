@@ -1,35 +1,18 @@
 package tools;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 
 public class ComplianceDB {
     public ArrayList<Complaints> CompliencesList = new ArrayList<>();
-
-
-    public void CreateAndLoadTable(String username){
-       // System.out.println("atlogin");
+    public void CreateAndLoadTable(String username) throws NoSuchFieldException, IllegalAccessException {
         String s ="file:/C:/DB/"+"Complaintable.csv";
-        URL url= null;
-        try {
-            url = new URL(s);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        FileWriterReader reader = new FileWriterReader();
-        ArrayList<String>lstr=new ArrayList<>();
-        try {
-            lstr=reader.read(url);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        ArrayList<String> lstr = FileWriterReader.loadFromCSV(s);
         CompliencesList.clear();
         for(String str:lstr){
             Complaints complaints = new Complaints();
-            complaints.parseFromString2(str);
+            complaints.updateFromString(str);
             if(complaints.Client.compareTo(username)==0){
                 CompliencesList.add(complaints);
             }
@@ -38,7 +21,6 @@ public class ComplianceDB {
     public int rowCount(){
         return CompliencesList.size();
     }
-
     public Object[] rowObject(int nr){
         Complaints complaints = CompliencesList.get(nr);
         ArrayList<Object> listofobj = new ArrayList<>();
@@ -96,7 +78,6 @@ public class ComplianceDB {
     }
     public void update(ArrayList<Complaints> complaints){
         Map<String, Complaints> map = new HashMap<>();// klucz numer reklamacji
-
         for(Complaints comp: complaints){
             map.put(comp.idofcomplaint, comp);
         }

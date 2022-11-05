@@ -8,7 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
+import java.lang.reflect.Field;
 
 public class MultiplePanels implements ActionListener {
     ComplianceDB complianceDB = new ComplianceDB();
@@ -70,19 +70,23 @@ public class MultiplePanels implements ActionListener {
                 ArrayList<Complaints> listofcomplains = new ArrayList<>();
                 while (client.numberofmessages() > 0) {
                     String str = client.getAndRemove();
-                    Complaints comp = new Complaints(str);
+                    System.out.println(str);
+                    Complaints comp = new Complaints();
+                    try {
+                        comp.updateFromString(str);
+                    } catch (NoSuchFieldException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (IllegalAccessException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     if(comp.command.compareTo("Wrong authorization!")==0) {
                         authorization = false;
                         JOptionPane.showMessageDialog(null, "Wrong login or password");
-
                     }
                     listofcomplains.add(comp);
                 }
                 complianceDB.update(listofcomplains);
-                for(Complaints S: listofcomplains){
-                    System.out.println(S.CurrentDate);
 
-                }
                 MyTableModel model = (MyTableModel) tableDemo.table.getModel();
                 for (int row = 0; row < complianceDB.rowCount(); row++) {
                     Object[] rowObject = complianceDB.rowObject(row);
@@ -90,7 +94,16 @@ public class MultiplePanels implements ActionListener {
                         model.setValueAt(rowObject[i], row, i);
                     }
                 }
-                Complaints comp = new Complaints(userlogin,username,password);
+                Complaints comp = null;
+                try {
+                    comp=new Complaints();
+                    String string = "login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";"+"Client:"+username+";";
+                    comp.updateFromString(string);
+                } catch (NoSuchFieldException ex) {
+                    throw new RuntimeException(ex);
+                } catch (IllegalAccessException ex) {
+                    throw new RuntimeException(ex);
+                }
                 comp.command="getAll";
                 client.sendMessage(comp.toString());
                 tableDemo.repaint();
@@ -104,18 +117,25 @@ public class MultiplePanels implements ActionListener {
             windows.dispose();
         }
     };
-
     ActionListener closeComplianceListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             for(Complaints comp: complianceDB.CompliencesList){
                 if(comp.status.compareTo("pickup")==0) {
-                    comp.changeHead(userlogin,username,password);
+                    try {
+                        String string = "login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";";
+                        comp.updateFromString(string);
+                        //comp.changeHead(userlogin,username,password);
+                    } catch (NoSuchFieldException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (IllegalAccessException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     comp.command="save";
                     comp.CloseDate= comp.CurrentDate;
                     comp.status="Closed";
                     client.sendMessage(comp.toString());
-                    }
+                }
                 tableDemo.repaint();
             }
         }
@@ -124,12 +144,20 @@ public class MultiplePanels implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent){
-        //System.out.println(actionEvent.getActionCommand());
         if(actionEvent.getActionCommand().compareTo("Send")==0) {
             Complaints comp =null;
             for(Complaints S: complianceDB.CompliencesList){
                 comp = S;
-                comp.changeHead(userlogin,username,password);
+
+                    String string = "login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";";
+                try {
+                    comp.updateFromString(string);
+                } catch (NoSuchFieldException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+
                 comp.command="save";
                 if(comp.status.compareTo("tosend")==0) {
                     comp.RegistrationDate= comp.CurrentDate;
@@ -139,16 +167,12 @@ public class MultiplePanels implements ActionListener {
             }
         }
 
-       /* if(actionEvent.getActionCommand().compareTo("Close")==0) {
-            windows.dispose();
-        }*/
         if(actionEvent.getActionCommand().compareTo("Login")==0) {
             authorization=true;
             String value = textArea.getText();
             String[] tab=value.split(":");
             username=tab[0].trim();
             password=tab[1].trim();
-
             try {
                 socket = new Socket("localhost", 1234);
             } catch (IOException e) {
@@ -156,36 +180,16 @@ public class MultiplePanels implements ActionListener {
             }
             client = new SocketClient(socket);
             client.listenForMessage();
-
-
-            complianceDB.CreateAndLoadTable(username);
-
+            try {
+                complianceDB.CreateAndLoadTable(username);
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("loaded");
         }
-      /*  if(actionEvent.getActionCommand().compareTo("Refresh view")==0) {
-            ArrayList<Complaints> listofcomplains = new ArrayList<>();
-            while(client.numberofmessages()>0){
-                String str=client.getAndRemove();
-                Complaints comp = new Complaints(str);
-                listofcomplains.add(comp);
-            }
-            complianceDB.update(listofcomplains);
-            MyTableModel model=(MyTableModel) tableDemo.table.getModel();
-            for(int row = 0; row < complianceDB.rowCount();row++){
 
-                Object[] rowObject= complianceDB.rowObject(row);
-                for(int i =0;i< model.getColumnCount();i++){
-                    model.setValueAt(rowObject[i],row,i);
-                    //System.out.println(rowObject[i]);
-                }
-            }
-            tableDemo.repaint();
-        }*/
-
-       /* if(actionEvent.getActionCommand().compareTo("Refresh")==0) {
-            Complaints comp = new Complaints(userlogin,username,password);
-            comp.command="getAll";
-            client.sendMessage(comp.toString());
-        }*/
         text.setVisible(true);
         panel_01.setBackground(Color.yellow);
         panel_02.setBackground(Color.green);
