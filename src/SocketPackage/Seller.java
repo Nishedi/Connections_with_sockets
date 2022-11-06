@@ -25,32 +25,27 @@ public class Seller {
                 String str=seller.getAndRemove();
                 comp = new Complaints();
                 comp.updateFromString(str);
-
+                System.out.println(str);
                 Random rand = new Random();
-                System.out.println(comp.status);
                 if(comp.status.compareTo("atseller")==0) {
-                    int d2 = rand.nextInt(1, 4);
+                    int d = rand.nextInt(1, 4);
                     Integer RegistrationDateInt = Integer.valueOf(comp.RegistrationDate);
                     Integer CurrentDateInt = Integer.valueOf(comp.CurrentDate);
                     Integer diffrence = CurrentDateInt - RegistrationDateInt;
-                    System.out.println(diffrence+" "+d2);
-                    if (diffrence > d2) {
-                        String string2 = "login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";";
-                        comp.updateFromString(string2);
+                    if (diffrence > d) {
+                        comp.updateFromString("login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";");
                         comp.status = "atproducer";
                         comp.ForwardDate = comp.CurrentDate;
                         seller.sendMessage(comp.toString());
                     }
                 }
                 if(comp.status.compareTo("confirmed")==0){
-                    int d2 = rand.nextInt(1, 4);
+                    int d = rand.nextInt(1, 4);
                     Integer ResponseDateInt = Integer.valueOf(comp.ResponseDate);
                     Integer CurrentDateInt = Integer.valueOf(comp.CurrentDate);
                     Integer diffrence = CurrentDateInt - ResponseDateInt;
-                    System.out.println(diffrence+" "+ d2);
-                    if (diffrence > d2) {
-                        String string2 = "login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";";
-                        comp.updateFromString(string2);
+                    if (diffrence > d) {
+                        comp.updateFromString("login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";");
                         comp.status = "pickup";
                         comp.PickupDate = comp.CurrentDate;
                         seller.sendMessage(comp.toString());

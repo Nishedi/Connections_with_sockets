@@ -1,13 +1,14 @@
 package tools;
 
+import SocketPackage.Server;
+
 import java.net.URL;
 import java.util.ArrayList;
 
 public class MainFrame {
     public static void main(String[] args) throws Exception {
-        String s ="file:/C:/DB/"+"Complaintable.csv";
-        URL url= new URL(s);
-        FileWriterReader reader = new FileWriterReader();
-        MultiplePanels multiplePanels = new MultiplePanels(reader.read(url));
+        URL url = MainFrame.class.getResource("Complaintable.csv");
+        System.out.println(url);
+        MultiplePanels multiplePanels = new MultiplePanels(url);
     }
 }

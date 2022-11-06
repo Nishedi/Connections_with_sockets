@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="mainframe">
+    <output-path>$PROJECT_DIR$/../../../../../DB</output-path>
+    <root id="archive" name="mainframe.jar">
+      <element id="module-output" name="socket" />
+      <element id="module-source" name="socket" />
+    </root>
+  </artifact>
+</component>

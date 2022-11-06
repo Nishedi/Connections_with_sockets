@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="seller">
+    <output-path>$PROJECT_DIR$/../../../../../DB</output-path>
+    <root id="archive" name="seller.jar">
+      <element id="module-output" name="socket" />
+      <element id="module-source" name="socket" />
+    </root>
+  </artifact>
+</component>

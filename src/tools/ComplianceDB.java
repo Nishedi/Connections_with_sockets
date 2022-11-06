@@ -1,14 +1,16 @@
 package tools;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 
 public class ComplianceDB {
     public ArrayList<Complaints> CompliencesList = new ArrayList<>();
-    public void CreateAndLoadTable(String username) throws NoSuchFieldException, IllegalAccessException {
-        String s ="file:/C:/DB/"+"Complaintable.csv";
-        ArrayList<String> lstr = FileWriterReader.loadFromCSV(s);
+    public void CreateAndLoadTable(String username, URL url) throws NoSuchFieldException, IllegalAccessException, MalformedURLException {
+
+        ArrayList<String> lstr = FileWriterReader.loadFromCSV(url);
         CompliencesList.clear();
         for(String str:lstr){
             Complaints complaints = new Complaints();
@@ -81,9 +83,23 @@ public class ComplianceDB {
         for(Complaints comp: complaints){
             map.put(comp.idofcomplaint, comp);
         }
-        for(int i = 0 ; i<=CompliencesList .size()-1;i++){
-            if(map.containsKey(CompliencesList.get(i).idofcomplaint)){
-               CompliencesList.set(i,map.get(complaints.get(i).idofcomplaint));
+        for(int i = 0 ; i<=CompliencesList.size()-1;i++){
+            String key = CompliencesList.get(i).idofcomplaint;
+            if(map.containsKey(key)){
+               CompliencesList.set(i,map.get(key));
+            }
+        }
+
+        map = new HashMap<>();// klucz numer reklamacji
+        for(Complaints comp: CompliencesList){
+            map.put(comp.idofcomplaint, comp);
+        }
+        for(int i = 0 ; i<=complaints.size()-1;i++) {
+
+            if (!map.containsKey(complaints.get(i).idofcomplaint)) {
+                Complaints comptemp = complaints.get(i);
+                System.out.println("!!!"+comptemp);
+                CompliencesList.add(comptemp);
             }
         }
     }

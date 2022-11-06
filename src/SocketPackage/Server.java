@@ -11,6 +11,7 @@ import java.net.URL;
 public class Server {
 
     private ServerSocket serverSocket;
+
     public Server(ServerSocket serverSocket) throws Exception {
         this.serverSocket = serverSocket;
     }
@@ -39,10 +40,9 @@ public class Server {
     }
 
     public static void main(String[] args) throws Exception {
-        String ss ="file:/C:/DB/"+"usernames.csv";
+        URL url = Server.class.getResource("usernames.csv");
         Menegerofusers meneger = new Menegerofusers();
-        meneger.Load(ss);
-
+        meneger.Load(url);
         ServerSocket serverSocket = new ServerSocket(1234);
         Server server = new Server(serverSocket);
         server.startServer(meneger);

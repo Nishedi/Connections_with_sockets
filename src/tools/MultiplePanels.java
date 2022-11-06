@@ -3,12 +3,13 @@ import SocketPackage.SocketClient;
 
 import java.awt.*;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 import java.util.ArrayList;
 import javax.swing.*;
-import java.lang.reflect.Field;
 
 public class MultiplePanels implements ActionListener {
     ComplianceDB complianceDB = new ComplianceDB();
@@ -22,6 +23,7 @@ public class MultiplePanels implements ActionListener {
     JButton click3 = new JButton("CloseCompliance");
     JLabel text2= new JLabel("Login as "+"no logged");
     JTextArea textArea = new JTextArea();
+    URL url=null;
 
     JLabel text = new JLabel("Button is clicked");
     public String username="Johny";
@@ -32,7 +34,8 @@ public class MultiplePanels implements ActionListener {
     Timer timer = null;
     boolean authorization = false;
 
-    public MultiplePanels(ArrayList<String> ListStr) {
+    public MultiplePanels(URL url) {
+        this.url=url;
         timer = new Timer(1000, timerListener);//ustawienie wyzwalania (100ms)
         timer.setDelay(2000);
         timer.start();//uruchomienie timera
@@ -144,11 +147,37 @@ public class MultiplePanels implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent){
+        ArrayList<Complaints> templist = new ArrayList<>();
         if(actionEvent.getActionCommand().compareTo("Send")==0) {
-            Complaints comp =null;
-            for(Complaints S: complianceDB.CompliencesList){
-                comp = S;
 
+            MyTableModel model = (MyTableModel) tableDemo.table.getModel();
+           for (int row = 0; row < 15; row++) {
+                    String id = model.getValueAt(row, 0).toString();
+                    String username2 = model.getValueAt(row, 1).toString();
+                    String product = model.getValueAt(row, 2).toString();
+                    String company = model.getValueAt(row, 3).toString();
+                    String status = model.getValueAt(row, 4).toString();
+                    String desription = model.getValueAt(row, 10).toString();
+                    if(status.compareTo("tosend")!=0) continue;
+                    if(username2.compareTo(username)!=0) continue;
+                    if(id.compareTo("")==0)continue;
+
+                    Complaints comp = new Complaints();
+               try {
+                   comp.updateFromString("idofcomplaint:"+id+";"+"Product:"+product+";"+"Client:"+username2+";"+"Company:"+company+";"+"status:"+status+";"+"description:"+desription+";"+"username:"+username+";"+"password:"+password+";");
+                    System.out.println(comp);
+               } catch (NoSuchFieldException e) {
+                   throw new RuntimeException(e);
+               } catch (IllegalAccessException e) {
+                   throw new RuntimeException(e);
+               }
+               templist.add(comp);
+               System.out.println(id+";"+username2+";"+product+";"+company+";"+status+";"+desription);
+
+            }
+            complianceDB.update(templist);
+
+            for(Complaints comp: complianceDB.CompliencesList){
                     String string = "login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";";
                 try {
                     comp.updateFromString(string);
@@ -181,15 +210,15 @@ public class MultiplePanels implements ActionListener {
             client = new SocketClient(socket);
             client.listenForMessage();
             try {
-                complianceDB.CreateAndLoadTable(username);
+
+                complianceDB.CreateAndLoadTable(username,url);
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException(e);
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException | MalformedURLException e) {
                 throw new RuntimeException(e);
             }
             System.out.println("loaded");
         }
-
         text.setVisible(true);
         panel_01.setBackground(Color.yellow);
         panel_02.setBackground(Color.green);

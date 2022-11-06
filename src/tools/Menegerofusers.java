@@ -1,4 +1,5 @@
 package tools;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +23,8 @@ public class Menegerofusers {
         }
         return null;
     }
-    public void Load(String filename) throws NoSuchFieldException, IllegalAccessException {
-        ArrayList<String> lstr = FileWriterReader.loadFromCSV(filename);
+    public void Load(URL url) throws NoSuchFieldException, IllegalAccessException {
+        ArrayList<String> lstr = FileWriterReader.loadFromCSV(url);
         mapofusers.clear();
         for (String str : lstr) {
             User user = new User();

@@ -1,5 +1,7 @@
 package SocketPackage;
 
+import tools.ListenerThread;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ public class SocketClient {
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-    private String username;
+    ListenerThread threadlistener=null;
     public int numberofmessages(){
         return listofids.size();
     }
@@ -27,7 +29,7 @@ public class SocketClient {
             this.bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         }catch (IOException e){
-            closeEverything(socket, bufferedReader, bufferedWriter);
+            close();
         }
     }
 
@@ -39,30 +41,16 @@ public class SocketClient {
                 bufferedWriter.flush();
             }
         }catch (IOException e){
-            closeEverything(socket, bufferedReader, bufferedWriter);
+            close();
         }
     }
 
     public void listenForMessage(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String msgFromGroupChat;
-                while (socket.isConnected()){
-                    try{
-                        msgFromGroupChat=bufferedReader.readLine();
-                        listofids.add(msgFromGroupChat);
-                    }catch (IOException e){
-                        closeEverything(socket, bufferedReader, bufferedWriter);
-                    }
-                }
-            }
-        }).start();
+        threadlistener = new ListenerThread(socket, bufferedReader, bufferedWriter, listofids);
+        threadlistener.start();
     }
     public void close(){
-        closeEverything(socket, bufferedReader, bufferedWriter);
-    }
-    public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+        threadlistener.stop();
         try {
             if (bufferedReader != null) {
                 bufferedReader.close();
@@ -77,5 +65,6 @@ public class SocketClient {
             e.printStackTrace();
         }
     }
+
 }
 

@@ -19,22 +19,23 @@ public class Producent {
         password = scan.nextLine();
         Complaints comp = new Complaints();
         Socket socket = new Socket("localhost", 1234);
-        SocketClient producent = new SocketClient(socket);
-        producent.listenForMessage();
+        SocketClient socketClient = new SocketClient(socket);
+        socketClient.listenForMessage();
 
         while(1==1){
             comp.updateFromString("login:"+userlogin+";"+"username:"+username+";"+"password:"+password+";");
             comp.command="getAllProducer";
-            producent.sendMessage(comp.toString());
+            socketClient.sendMessage(comp.toString());
             Thread.sleep(1000);
 
-            while(producent.numberofmessages()>0){
-                String str=producent.getAndRemove();
+            while(socketClient.numberofmessages()>0){
+                String str=socketClient.getAndRemove();
                 System.out.println(str);
                 comp = new Complaints();
                 comp.updateFromString(str);
                 if(comp.command.compareTo("Wrong authorization!")==0){
                     System.out.println("Wrong authorization!");
+                    socketClient.close();
                     return;
                 }
                 Random rand = new Random();
@@ -47,7 +48,7 @@ public class Producent {
                     comp.updateFromString(string);
                     comp.status="confirmed";
                     comp.ResponseDate = comp.CurrentDate;
-                    producent.sendMessage(comp.toString());
+                    socketClient.sendMessage(comp.toString());
                 }
             }
         }
